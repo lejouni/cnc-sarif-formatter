@@ -1,0 +1,48 @@
+name: "Coverity Sarif Formatter"
+description: "Will use Coverity API to create sarif format outputfile from it. This will work with on-prem and Cloud Native Coverity (CNC)"
+author: Jouni Lehto
+branding:
+  icon: code
+  color: blue
+inputs:
+  log_level:
+    description: Logging level
+    default: DEBUG
+    required: false
+  url:
+    description: "Cloud Native Coverity (CNC) URL"
+    required: true
+  project:
+    description: "Coverity project name"
+    required: false
+    default: ${{github.repository}}
+  stream:
+    description: "Coverity stream name."
+    required: false
+    default: ${{github.ref_name}}
+  password:
+    description: "User password for Coverity"
+    required: true
+  username:
+    description: 'Username for Coverity'
+    required: true
+  impactNameList:
+    description: "Comma separated list of impact names for filttering. Options: high, medium, low, default=high, medium, low"
+    required: false
+    default: high,medium,low
+  statusNamesList:
+    description: "Comma separated list of statuses for filttering. Options: New,Triaged,Dismissed,Fixed, default=New,Triaged,Dismissed,Fixed"
+    required: false
+    default: New,Triaged,Dismissed,Fixed
+  outputFile:
+    description: "Filename with path where it will be created, example: github.workspace/cncFindings.sarif.json (default)"
+    default: ${{github.workspace}}/cncFindings.sarif.json
+    required: false
+
+runs:
+  using: composite
+  steps:
+    # Run the Python script
+    - run: |
+        python3 ${{github.action_path}}/cncResultsToSarif.py --statusNamesList=${{inputs.statusNamesList}} --outputFile=${{inputs.outputFile}}  --password=${{inputs.password}} --username=${{inputs.username}} --impactNameList=${{inputs.impactNameList}} --log_level=${{inputs.log_level}} --url=${{inputs.url}} --project=${{inputs.project}} --stream=${{inputs.stream}}
+      shell: bash
