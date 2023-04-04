@@ -44,5 +44,5 @@ runs:
   steps:
     # Run the Python script
     - run: |
-        python3 ${{github.action_path}}/cncResultsToSarif.py --statusNamesList=${{inputs.statusNamesList}} --outputFile=${{inputs.outputFile}}  --password=${{inputs.password}} --username=${{inputs.username}} --impactNameList=${{inputs.impactNameList}} --log_level=${{inputs.log_level}} --url=${{inputs.url}} --project=${{inputs.project}} --stream=${{inputs.stream}}
+        python3 ${{github.action_path}}/cncResultstoSarif.py --statusNamesList="${{inputs.statusNamesList}}" --outputFile="${{inputs.outputFile}}"  --password="${{inputs.password}}" --username="${{inputs.username}}" --impactNameList="${{inputs.impactNameList}}" --log_level="${{inputs.log_level}}" --url="${{inputs.url}}" --project="${{inputs.project}}" --stream="${{inputs.stream}}"
       shell: bash
