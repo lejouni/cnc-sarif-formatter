@@ -64,7 +64,7 @@ def getResults(stream, project):
             if not ruleId in ruleIds:
                 rule = {"id": ruleId, "name": issue["type.name"], "shortDescription":{"text": issue["type.name"]}, 
                         "fullDescription":{"text":f'{issue["longDescription"][:1000] if issue["longDescription"] else "N/A"}', "markdown":f'{issue["longDescription"][:1000] if issue["longDescription"] else "N/A"}'},
-                        "help":{"text":f'{issue["longDescription"][:1000] if issue["longDescription"] else "N/A"}', "markdown":getRuleHelpMarkdownMessage(issue)},
+                        "help":{"text":f'{issue["longDescription"] if issue["longDescription"] else "N/A"}', "markdown":getRuleHelpMarkdownMessage(issue)},
                         "properties": {"security-severity": nativeSeverityToNumber(issue['impact.displayName']), "tags": addTags(issue['issueKinds'], issue['cwe'])},
                         "defaultConfiguration":{"level":nativeSeverityToLevel(issue['impact.displayName'].lower())}}
                 rules.append(rule)
@@ -84,8 +84,6 @@ def getResults(stream, project):
                     sarifIssue['locations'] = [{"physicalLocation":{"artifactLocation":{"uri":event["filePathname"][1::]},"region":{"startLine": int(mainlineNumber)}}}]
                     sarifIssue['partialFingerprints'] = {"primaryLocationLineHash": hashlib.sha256((f'{issue["cid"]}{event["filePathname"][1::]}{mainlineNumber}').encode(encoding='UTF-8')).hexdigest()}
                     messageText += event['eventDescription']
-                if event['eventKind'] == "REMEDIATION": remediationText = event['eventDescription']
-            messageText += f'\nRemediation Advice: {remediationText}'
             sarifIssue['message'] = {"text": messageText[:1000]}
             codeFlowsTable, loctionsFlowsTable = [], []
             threadFlows, loctionsFlows = {}, {}
@@ -105,10 +103,9 @@ def getRuleHelpMarkdownMessage(issue):
     messageText = ""
     remediationText = ""
     messageText += f'{issue["longDescription"] if issue["longDescription"] else "N/A"}'
-    messageText += f"\n\n## Local effect\n{issue['localEffect']}"
+    if "local_effect" in issue and issue['local_effect']: messageText += f"\n\n## Local effect\n{issue['localEffect']}"
     for event in issue['events']:
-        if event['eventKind'] == "REMEDIATION": remediationText = event['eventDescription']
-    messageText += f"\n\n## Remediation\n{remediationText}"
+        if event['eventKind'] == "REMEDIATION" and event['eventDescription']: messageText += f'\n\n## Remediation\n{issue["remediation"]}\n\n'
     if issue['cwe']:
         messageText += f"\n\n## References\n* Common Weakness Enumeration: [CWE-{issue['cwe']}](https://cwe.mitre.org/data/definitions/{issue['cwe']}.html)"
     return messageText
