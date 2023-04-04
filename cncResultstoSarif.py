@@ -105,7 +105,7 @@ def getRuleHelpMarkdownMessage(issue):
     messageText += f'{issue["longDescription"] if issue["longDescription"] else "N/A"}'
     if "local_effect" in issue and issue['local_effect']: messageText += f"\n\n## Local effect\n{issue['localEffect']}"
     for event in issue['events']:
-        if event['eventKind'] == "REMEDIATION" and event['eventDescription']: messageText += f'\n\n## Remediation\n{issue["remediation"]}\n\n'
+        if event['eventKind'] == "REMEDIATION" and event['eventDescription']: messageText += f'\n\n## Remediation\n{event["eventDescription"]}\n\n'
     if issue['cwe']:
         messageText += f"\n\n## References\n* Common Weakness Enumeration: [CWE-{issue['cwe']}](https://cwe.mitre.org/data/definitions/{issue['cwe']}.html)"
     return messageText
