@@ -12,10 +12,6 @@ inputs:
   url:
     description: "Cloud Native Coverity (CNC) URL"
     required: true
-  project:
-    description: "Coverity project name"
-    required: false
-    default: ${{github.repository}}
   stream:
     description: "Coverity stream name."
     required: false
@@ -45,5 +41,5 @@ runs:
     # Run the Python script
     - run: |
         pip3 install suds requests
-        python3 ${{github.action_path}}/cncResultstoSarif.py --statusNamesList="${{inputs.statusNamesList}}" --outputFile="${{inputs.outputFile}}"  --password="${{inputs.password}}" --username="${{inputs.username}}" --impactNameList="${{inputs.impactNameList}}" --log_level="${{inputs.log_level}}" --url="${{inputs.url}}" --project="${{inputs.project}}" --stream="${{inputs.stream}}"
+        python3 ${{github.action_path}}/cncResultstoSarif.py --statusNamesList="${{inputs.statusNamesList}}" --outputFile="${{inputs.outputFile}}"  --password="${{inputs.password}}" --username="${{inputs.username}}" --impactNameList="${{inputs.impactNameList}}" --log_level="${{inputs.log_level}}" --url="${{inputs.url}}" --stream="${{inputs.stream}}"
       shell: bash
