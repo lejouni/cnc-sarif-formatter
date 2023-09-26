@@ -1,5 +1,6 @@
 from suds.client import Client
 from suds.wsse import Security, UsernameToken
+import suds
 import argparse
 import logging
 import urllib.request
@@ -12,7 +13,7 @@ import hashlib
 from timeit import default_timer as timer
 
 __author__ = "Jouni Lehto"
-__versionro__="0.0.3"
+__versionro__="0.0.4"
 
 #Global variables
 args = None
@@ -30,6 +31,11 @@ class UnverifiedHttpsTransport(suds.transport.http.HttpTransport):
         context.verify_mode = ssl.CERT_NONE
         handlers.append(urllib.request.HTTPSHandler(context=context))
         return handlers
+
+    def u2opener(self):
+        opener = super(UnverifiedHttpsTransport, self).u2opener()
+        opener.addheaders = [('User-agent', "Mozilla")]
+        return opener
 
 class WebServiceClient:
     def __init__(self, webservice_type, url, username, password):
@@ -145,6 +151,7 @@ def nativeSeverityToNumber(argument):
     return switcher.get(argument, "6.8")
 
 def getMergedDefectsForSnapshotScope(stream_name, project_name):
+    global defectServiceClient
     projectIdDataObj=defectServiceClient.factory.create('projectIdDataObj')
     projectIdDataObj.name=project_name
     snapshotScopeDefectFilterSpecDataObj=defectServiceClient.factory.create('snapshotScopeDefectFilterSpecDataObj')
@@ -171,6 +178,7 @@ def getMergedDefectsForSnapshotScope(stream_name, project_name):
         logging.error(e)
 
 def getStreamDefects(mergedDefectIdDataObjs, stream_name):
+    global defectServiceClient
     streamDefectFilterSpecDataObj = defectServiceClient.factory.create('streamDefectFilterSpecDataObj')
     streamIdDataObjs = []
     streamIdDataObj = defectServiceClient.factory.create('streamIdDataObj')
@@ -285,7 +293,7 @@ if __name__ == '__main__':
     logging.getLogger("suds").setLevel(logging.WARNING)
     #Printing out the version number
     logging.info("cncResultstoSarif version: " + __versionro__)
-    defectServiceClient = DefectserviceClient(args.url, args.username, args.password).client
+    defectServiceClient = DefectserviceClient(url=args.url, username=args.username, password=args.password).client
 
     # If project name is not given as a parameter, then it will try to get it with the given stream name.
     project = args.project if args.project else getProjectNameforStream()
