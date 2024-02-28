@@ -13,7 +13,7 @@ import hashlib
 from timeit import default_timer as timer
 
 __author__ = "Jouni Lehto"
-__versionro__="0.0.4"
+__versionro__="0.0.5"
 
 #Global variables
 args = None
@@ -118,7 +118,7 @@ def getRuleHelpMarkdownMessage(issue):
 
 
 def addTags(kinds, cwe):
-    tags = []
+    tags = ["security", "SAST"]
     tags.extend(kinds)
     if cwe:
         tags.append(f'external/cwe/cwe-{cwe}')
