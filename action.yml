@@ -19,6 +19,10 @@ inputs:
     description: "Coverity stream name."
     required: false
     default: ${{github.ref_name}}
+  tool_name:
+    description: "Sarif tool name."
+    required: false
+    default: Coverity
   password:
     description: "User password for Coverity"
     required: true
@@ -44,5 +48,5 @@ runs:
     # Run the Python script
     - run: |
         pip3 install suds requests
-        python3 ${{github.action_path}}/cncResultstoSarif.py --statusNamesList="${{inputs.statusNamesList}}" --outputFile="${{inputs.outputFile}}"  --password="${{inputs.password}}" --username="${{inputs.username}}" --impactNameList="${{inputs.impactNameList}}" --log_level="${{inputs.log_level}}" --url="${{inputs.url}}" --project="${{inputs.project}}" --stream="${{inputs.stream}}"
+        python3 ${{github.action_path}}/cncResultstoSarif.py --tool_name="${{inputs.tool_name}}" --statusNamesList="${{inputs.statusNamesList}}" --outputFile="${{inputs.outputFile}}"  --password="${{inputs.password}}" --username="${{inputs.username}}" --impactNameList="${{inputs.impactNameList}}" --log_level="${{inputs.log_level}}" --url="${{inputs.url}}" --project="${{inputs.project}}" --stream="${{inputs.stream}}"
       shell: bash

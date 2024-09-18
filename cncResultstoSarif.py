@@ -88,7 +88,7 @@ def getResults(stream, project):
                 if event["main"]:
                     mainlineNumber=f'{int(event["lineNumber"]) if event["lineNumber"] else 1}'
                     sarifIssue['locations'] = [{"physicalLocation":{"artifactLocation":{"uri":event["filePathname"][1::]},"region":{"startLine": int(mainlineNumber)}}}]
-                    sarifIssue['partialFingerprints'] = {"primaryLocationLineHash": hashlib.sha256((f'{issue["cid"]}{event["filePathname"][1::]}{mainlineNumber}').encode(encoding='UTF-8')).hexdigest()}
+                    # sarifIssue['partialFingerprints'] = {"primaryLocationLineHash": hashlib.sha256((f'{issue["cid"]}{event["filePathname"][1::]}{mainlineNumber}').encode(encoding='UTF-8')).hexdigest()}
                     messageText += event['eventDescription']
             sarifIssue['message'] = {"text": messageText[:1000]}
             codeFlowsTable, loctionsFlowsTable = [], []
@@ -107,13 +107,17 @@ def getResults(stream, project):
 
 def getRuleHelpMarkdownMessage(issue):
     messageText = ""
-    remediationText = ""
     messageText += f'{issue["longDescription"] if issue["longDescription"] else "N/A"}'
     if "local_effect" in issue and issue['local_effect']: messageText += f"\n\n## Local effect\n{issue['localEffect']}"
     for event in issue['events']:
         if event['eventKind'] == "REMEDIATION" and event['eventDescription']: messageText += f'\n\n## Remediation\n{event["eventDescription"]}\n\n'
     if issue['cwe']:
         messageText += f"\n\n## References\n* Common Weakness Enumeration: [CWE-{issue['cwe']}](https://cwe.mitre.org/data/definitions/{issue['cwe']}.html)"
+    # METADATA for birectional connection
+    messageText += "\n\n## Metadata\n"
+    messageText += f"**Coverity Project Name:** {args.project}\n"
+    messageText += f"**Coverity Stream:** {args.stream}\n"
+    messageText += f"**Coverity CID:** {issue["cid"]}"
     return messageText
 
 
@@ -276,13 +280,14 @@ if __name__ == '__main__':
     )
     #Parse commandline arguments
     parser.add_argument('--url', help="Cloud Native Coverity (CNC) URL.", default="", required=True)
+    parser.add_argument('--tool_name', help="Tool name for Sarif file.", default="Coverity", required=True)
     parser.add_argument('--project', help="Coverity project name.", default="")
     parser.add_argument('--stream', help="Coverity stream name.", default="", required=True)
     parser.add_argument('--password', help='User password for Coverity', default="", required=True)
     parser.add_argument('--username', help='Username for Coverity', default="", required=True)
     parser.add_argument('--log_level', help="Will print more info... default=INFO", default="INFO")
     parser.add_argument('--impactNameList', help='Comma separated list of impact names for filttering. Options: high, medium, low', default="high, medium, low", required=False)
-    parser.add_argument('--statusNamesList', help='Comma separated list of statuses for filttering. Options: New,Triaged,Dismissed,Fixed', default="New,Triaged,Dismissed,Fixed", required=False)
+    parser.add_argument('--statusNamesList', help='Comma separated list of statuses for filttering. Options: New,Triaged,Dismissed,Fixed', default="New", required=False)
     parser.add_argument('--outputFile', help="Filename with path where it will be created, example: /tmp/cncFindings.sarif.json \
                                                 if outputfile is not given, then json is printed stdout.", required=False)
     args = parser.parse_args()
@@ -299,7 +304,7 @@ if __name__ == '__main__':
     project = args.project if args.project else getProjectNameforStream()
     results, rules = getResults(args.stream, project)
     if results and len(results) > 0 and rules and len(rules) > 0:
-        results['tool'] = getSarifJsonFooter("CNC", rules)
+        results['tool'] = getSarifJsonFooter(args.tool_name, rules)
         runs = []
         runs.append(results)
         sarif_json = getSarifJsonHeader()
