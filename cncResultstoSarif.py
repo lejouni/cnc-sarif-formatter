@@ -117,7 +117,7 @@ def getRuleHelpMarkdownMessage(issue):
     messageText += "\n\n## Metadata\n"
     messageText += f"**Coverity Project Name:** {args.project}\n"
     messageText += f"**Coverity Stream:** {args.stream}\n"
-    messageText += f"**Coverity CID:** {issue["cid"]}"
+    messageText += f"**Coverity CID:** {issue['cid']}"
     return messageText
 
 
